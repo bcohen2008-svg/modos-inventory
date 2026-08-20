@@ -43,18 +43,39 @@ class InventoryCapacityEngine:
             # Primers
             "pavex primer": "pavex primer", "pavex primer plus": "pavex primer",
             
-            # Stonefeel / Stone Pool components
-            "stone pool base": "stone pool base grueso",
-            "stone pool base grueso": "stone pool base grueso",
-            "stonefeel grueso": "stone pool base grueso",
-            "stone pool fino": "stone pool fino neutro",
-            "stone pool fino neutro": "stone pool fino neutro",
-            "stonefeel fino": "stone pool fino neutro",
+            # Distinct Stonefeel Powders & Resins
+            "stonefeel pool base grueso": "stonefeel base grueso",
+            "stone pool base grueso": "stonefeel base grueso",
+            "stonefeel base grueso": "stonefeel base grueso",
+            "stone pool base": "stonefeel base grueso",
+            
+            "stonefeel grueso neutro": "stonefeel grueso",
+            "stonefeel grueso": "stonefeel grueso",
+            "stone pool grueso": "stonefeel grueso",
+            
+            # Fino Colors
+            "stonefeel pool fino nuetro": "stonefeel fino (neutro)",
+            "stonefeel pool fino neutro": "stonefeel fino (neutro)",
+            "stonefeel fino (neutro)": "stonefeel fino (neutro)",
+            "stonefeel pool fino tiffra": "stonefeel fino (tiffra)",
+            "stonefeel fino (tiffra)": "stonefeel fino (tiffra)",
+            "stonefeel pool fino hueso": "stonefeel fino (hueso)",
+            "stonefeel fino (hueso)": "stonefeel fino (hueso)",
+            "stonefeel pool fino jade": "stonefeel fino (jade)",
+            "stonefeel fino (jade)": "stonefeel fino (jade)",
+            "stonefeel fino": "stonefeel fino (total)",
+            "stone pool fino": "stonefeel fino (total)",
+            
             "stone feel base fina 0.4": "stone feel base fina 0.4",
             "stone feel base fina": "stone feel base fina 0.4",
-            "stone pool base resin": "stone pool base resin",
-            "stone pool fine resin": "stone pool fine resin",
-            "pavimper": "pavimper", "pavimper 2c": "pavimper"
+            "stonefeel base fina": "stone feel base fina 0.4",
+            
+            "stone feel pool base": "stone feel pool base",
+            "stone pool base resin": "stone feel pool base",
+            
+            "stone feel pool finish": "stone feel fine resin",
+            "stone pool fine resin": "stone feel fine resin",
+            "stonepool finish": "stone feel fine resin"
         }
         self.unlimited_terms = ["quartz", "pigment", "accelerator", "sand", "קוורץ", "פיגמנט", "אקסלרטור"]
 
@@ -79,6 +100,17 @@ class InventoryCapacityEngine:
             raise ValueError(f"System '{system_name}' not found.")
             
         inv_agg = inv.groupby("item_norm", as_index=False)["Quantity"].sum()
+        
+        # Calculate total combined fino if color lines are listed separately
+        fino_color_items = [
+            "stonefeel fino (neutro)", "stonefeel fino (tiffra)",
+            "stonefeel fino (hueso)", "stonefeel fino (jade)"
+        ]
+        fino_total_qty = inv_agg[inv_agg["item_norm"].isin(fino_color_items)]["Quantity"].sum()
+        
+        if "stonefeel fino (total)" not in inv_agg["item_norm"].values and fino_total_qty > 0:
+            inv_agg = pd.concat([inv_agg, pd.DataFrame([{"item_norm": "stonefeel fino (total)", "Quantity": fino_total_qty}])], ignore_index=True)
+            
         merged = pd.merge(sys_recipe, inv_agg, on="item_norm", how="left")
         merged["Quantity"] = merged["Quantity"].fillna(0.0)
         
@@ -118,20 +150,37 @@ class InventoryCapacityEngine:
             "Status": merged["status"]
         })
         
+        # Color-specific breakdown for Fino
+        color_breakdown = []
+        if any("fino" in item for item in sys_recipe["item_norm"]):
+            rate_row = sys_recipe[sys_recipe["item_norm"] == "stonefeel fino (total)"]
+            if not rate_row.empty:
+                fino_rate = float(rate_row["Rate"].iloc[0])
+                for color_name in ["Neutro", "Tiffra", "Hueso", "Jade"]:
+                    color_key = f"stonefeel fino ({color_name.lower()})"
+                    qty_val = float(inv_agg[inv_agg["item_norm"] == color_key]["Quantity"].sum()) if color_key in inv_agg["item_norm"].values else 0.0
+                    m2_color = qty_val / fino_rate if fino_rate > 0 else 0.0
+                    color_breakdown.append({
+                        "Fino Color": color_name,
+                        "Stock (kg)": qty_val,
+                        "Rate / m²": fino_rate,
+                        "Meters Possible (m²)": round(m2_color, 2)
+                    })
+
         return {
             "system": system_name,
             "max_meters": round(max_meters, 2),
             "bottleneck": bottleneck_item,
-            "table": display_df
+            "table": display_df,
+            "color_breakdown": pd.DataFrame(color_breakdown) if color_breakdown else None
         }
 
 # -------------------------------------------------------------
 # APP INTERFACE
 # -------------------------------------------------------------
 st.title("🏗️ MODOS Flooring Inventory & Capacity Dashboard")
-st.markdown("Real-time bottleneck and yield calculator with editable inventory.")
+st.markdown("Real-time bottleneck and yield calculator with editable inventory and color breakdowns.")
 
-# Default data
 default_inv = [
     {"Item": "Paviseal 300", "Quantity": 1040.0, "Unit": "L"},
     {"Item": "Paviseal 700", "Quantity": 25.0, "Unit": "kg"},
@@ -139,11 +188,15 @@ default_inv = [
     {"Item": "Pavex Primer", "Quantity": 45.0, "Unit": "kg"},
     {"Item": "Veladura", "Quantity": 75.0, "Unit": "kg"},
     {"Item": "Orfapol 50", "Quantity": 98.4, "Unit": "kg"},
-    {"Item": "Stone Pool Base Grueso", "Quantity": 1250.0, "Unit": "kg"},
-    {"Item": "Stone Pool Base Resin", "Quantity": 135.0, "Unit": "L"},
-    {"Item": "Stone Pool Fino Neutro", "Quantity": 525.0, "Unit": "kg"},
-    {"Item": "Stone Pool Fine Resin", "Quantity": 252.5, "Unit": "L"},
-    {"Item": "Stone feel base fina 0.4", "Quantity": 900.0, "Unit": "kg"},
+    {"Item": "Stonefeel base grueso", "Quantity": 1225.0, "Unit": "kg"}, # 49 bags x 25kg
+    {"Item": "Stonefeel grueso", "Quantity": 800.0, "Unit": "kg"},       # 32 bags x 25kg
+    {"Item": "Stonefeel fino (Neutro)", "Quantity": 475.0, "Unit": "kg"}, # 19 bags x 25kg
+    {"Item": "Stonefeel fino (Tiffra)", "Quantity": 50.0, "Unit": "kg"},  # 2 bags x 25kg
+    {"Item": "Stonefeel fino (Hueso)", "Quantity": 0.0, "Unit": "kg"},   # 0 in stock
+    {"Item": "Stonefeel fino (Jade)", "Quantity": 0.0, "Unit": "kg"},    # 0 in stock
+    {"Item": "Stone feel base fina 0.4", "Quantity": 900.0, "Unit": "kg"},# 36 bags x 25kg
+    {"Item": "Stone feel pool base", "Quantity": 135.0, "Unit": "L"},    # Liquid base resin
+    {"Item": "Stone feel fine resin", "Quantity": 252.5, "Unit": "L"},   # Liquid finish resin
     {"Item": "Lithium Silicate", "Quantity": 42.0, "Unit": "kg"},
     {"Item": "Ecopox CEM", "Quantity": 60.0, "Unit": "kg"},
     {"Item": "ECofondo One", "Quantity": 392.0, "Unit": "kg"},
@@ -181,36 +234,38 @@ recipes_data = [
     
     # 4. Stonefeel fino
     {"System": "Stonefeel fino", "Item": "פריימר F300", "Rate": 0.04},
-    {"System": "Stonefeel fino", "Item": "Stone Pool Base", "Rate": 4.00},
-    {"System": "Stonefeel fino", "Item": "Stone Pool Base Resin", "Rate": 1.00},
-    {"System": "Stonefeel fino", "Item": "Stone Pool Fino", "Rate": 3.00},
-    {"System": "Stonefeel fino", "Item": "Stone Pool Fine Resin", "Rate": 1.00},
-    {"System": "Stonefeel fino", "Item": "Lithim Silicate", "Rate": 0.01},
-    {"System": "Stonefeel fino", "Item": "Hidrofugante / F700", "Rate": 0.005},
+    {"System": "Stonefeel fino", "Item": "Stonefeel base grueso", "Rate": 4.00},
+    {"System": "Stonefeel fino", "Item": "Stone feel pool base", "Rate": 1.00},
+    {"System": "Stonefeel fino", "Item": "Stonefeel fino", "Rate": 3.00},
+    {"System": "Stonefeel fino", "Item": "Stone feel fine resin", "Rate": 1.00},
+    {"System": "Stonefeel fino", "Item": "Lithium Silicate", "Rate": 0.01},
+    {"System": "Stonefeel fino", "Item": "Paviseal 700", "Rate": 0.005},
     
     # 5. Stonefeel grueso
     {"System": "Stonefeel grueso", "Item": "פריימר F300", "Rate": 0.04},
-    {"System": "Stonefeel grueso", "Item": "Stone Pool Base", "Rate": 4.00},
-    {"System": "Stonefeel grueso", "Item": "Stone Pool Base Resin", "Rate": 1.00},
-    {"System": "Stonefeel grueso", "Item": "Stone Pool Fine Resin", "Rate": 1.00},
-    {"System": "Stonefeel grueso", "Item": "Lithim Silicate", "Rate": 0.01},
-    {"System": "Stonefeel grueso", "Item": "Hidrofugante / F700", "Rate": 0.005},
+    {"System": "Stonefeel grueso", "Item": "Stonefeel base grueso", "Rate": 4.00},
+    {"System": "Stonefeel grueso", "Item": "Stone feel pool base", "Rate": 1.00},
+    {"System": "Stonefeel grueso", "Item": "Stonefeel grueso", "Rate": 4.00},
+    {"System": "Stonefeel grueso", "Item": "Stone feel fine resin", "Rate": 1.00},
+    {"System": "Stonefeel grueso", "Item": "Lithium Silicate", "Rate": 0.01},
+    {"System": "Stonefeel grueso", "Item": "Paviseal 700", "Rate": 0.005},
     
     # 6. Stonefeel Fino and grueso
     {"System": "Stonefeel Fino and grueso", "Item": "פריימר F300", "Rate": 0.04},
-    {"System": "Stonefeel Fino and grueso", "Item": "Stone Pool Base", "Rate": 2.00},
-    {"System": "Stonefeel Fino and grueso", "Item": "Stone Pool Fino", "Rate": 2.00},
-    {"System": "Stonefeel Fino and grueso", "Item": "Stone Pool Base Resin", "Rate": 1.00},
-    {"System": "Stonefeel Fino and grueso", "Item": "Stone Pool Fine Resin", "Rate": 1.00},
-    {"System": "Stonefeel Fino and grueso", "Item": "Lithim Silicate", "Rate": 0.01},
-    {"System": "Stonefeel Fino and grueso", "Item": "Hidrofugante / F700", "Rate": 0.005},
+    {"System": "Stonefeel Fino and grueso", "Item": "Stonefeel base grueso", "Rate": 4.00},
+    {"System": "Stonefeel Fino and grueso", "Item": "Stone feel pool base", "Rate": 1.00},
+    {"System": "Stonefeel Fino and grueso", "Item": "Stonefeel fino", "Rate": 2.00},
+    {"System": "Stonefeel Fino and grueso", "Item": "Stonefeel grueso", "Rate": 2.00},
+    {"System": "Stonefeel Fino and grueso", "Item": "Stone feel fine resin", "Rate": 1.00},
+    {"System": "Stonefeel Fino and grueso", "Item": "Lithium Silicate", "Rate": 0.01},
+    {"System": "Stonefeel Fino and grueso", "Item": "Paviseal 700", "Rate": 0.005},
     
     # 7. Stonefeel walls fino
     {"System": "Stonefeel walls fino", "Item": "פריימר F300", "Rate": 0.04},
     {"System": "Stonefeel walls fino", "Item": "Stone feel base fina 0.4", "Rate": 3.00},
-    {"System": "Stonefeel walls fino", "Item": "Stone Pool Fine Resin", "Rate": 1.00},
-    {"System": "Stonefeel walls fino", "Item": "Lithim Silicate", "Rate": 0.01},
-    {"System": "Stonefeel walls fino", "Item": "Hidrofugante / F700", "Rate": 0.005}
+    {"System": "Stonefeel walls fino", "Item": "Stone feel fine resin", "Rate": 1.00},
+    {"System": "Stonefeel walls fino", "Item": "Lithium Silicate", "Rate": 0.01},
+    {"System": "Stonefeel walls fino", "Item": "Paviseal 700", "Rate": 0.005}
 ]
 
 rec_df = pd.DataFrame(recipes_data)
@@ -229,7 +284,7 @@ else:
     inv_df = pd.DataFrame(default_inv)
 
 st.subheader("📝 Live Editable Warehouse Inventory")
-st.caption("Double-click any quantity below to edit live. All systems will recalculate instantly.")
+st.caption("Double-click any quantity below to edit live. Fino colors and system yields recalculate instantly.")
 edited_inv_df = st.data_editor(inv_df, num_rows="dynamic", use_container_width=True)
 
 # Calculation
@@ -272,6 +327,11 @@ for i, s in enumerate(systems):
     with tabs[i]:
         res = results[s]
         st.dataframe(res["table"], use_container_width=True)
+        
+        # Display color breakdown table if present
+        if res["color_breakdown"] is not None:
+            st.markdown("🎨 **Stonefeel Fino Colors Capacity Breakdown:**")
+            st.dataframe(res["color_breakdown"], use_container_width=True)
 
 # Excel Export Button
 excel_buffer = io.BytesIO()
@@ -279,10 +339,12 @@ with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
     pd.DataFrame(summary_list).to_excel(writer, sheet_name="Executive Summary", index=False)
     for s in systems:
         results[s]["table"].to_excel(writer, sheet_name=s[:31], index=False)
+        if results[s]["color_breakdown"] is not None:
+            results[s]["color_breakdown"].to_excel(writer, sheet_name=f"{s[:20]}_Colors", index=False)
 
 st.download_button(
-    label="📥 Download Complete Updated Excel Report",
+    label="📥 Download Complete Updated Excel Report (With Colors)",
     data=excel_buffer.getvalue(),
-    file_name="MODOS_All_Systems_Report.xlsx",
+    file_name="MODOS_All_Systems_With_Colors_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
