@@ -98,10 +98,28 @@ class InventoryCapacityEngine:
         norm = str(text).strip().lower()
         return any(term in norm for term in self.unlimited_terms)
 
-    def calculate(self, inventory_df: pd.DataFrame, recipes_df: pd.DataFrame, system_name: str) -> dict:
+    def prepare_inventory(self, inventory_df: pd.DataFrame) -> pd.DataFrame:
         inv = inventory_df.copy()
-        rec = recipes_df.copy()
         inv["item_norm"] = inv["Item"].astype(str).apply(self.normalize)
+        inv_agg = inv.groupby("item_norm", as_index=False)["Quantity"].sum()
+        
+        # Aggregate fino colors into total fino
+        fino_color_items = [
+            "stonefeel fino (neutro)", "stonefeel fino (tiffra)",
+            "stonefeel fino (hueso)", "stonefeel fino (jade)"
+        ]
+        fino_total_qty = inv_agg[inv_agg["item_norm"].isin(fino_color_items)]["Quantity"].sum()
+        
+        if fino_total_qty > 0:
+            if "stonefeel fino (total)" in inv_agg["item_norm"].values:
+                inv_agg.loc[inv_agg["item_norm"] == "stonefeel fino (total)", "Quantity"] = fino_total_qty
+            else:
+                inv_agg = pd.concat([inv_agg, pd.DataFrame([{"item_norm": "stonefeel fino (total)", "Quantity": fino_total_qty}])], ignore_index=True)
+        return inv_agg
+
+    def calculate(self, inventory_df: pd.DataFrame, recipes_df: pd.DataFrame, system_name: str) -> dict:
+        inv_agg = self.prepare_inventory(inventory_df)
+        rec = recipes_df.copy()
         rec["system_norm"] = rec["System"].astype(str).apply(self.normalize)
         rec["item_norm"] = rec["Item"].astype(str).apply(self.normalize)
         
@@ -110,17 +128,6 @@ class InventoryCapacityEngine:
         
         if sys_recipe.empty:
             raise ValueError(f"System '{system_name}' not found.")
-            
-        inv_agg = inv.groupby("item_norm", as_index=False)["Quantity"].sum()
-        
-        fino_color_items = [
-            "stonefeel fino (neutro)", "stonefeel fino (tiffra)",
-            "stonefeel fino (hueso)", "stonefeel fino (jade)"
-        ]
-        fino_total_qty = inv_agg[inv_agg["item_norm"].isin(fino_color_items)]["Quantity"].sum()
-        
-        if "stonefeel fino (total)" not in inv_agg["item_norm"].values and fino_total_qty > 0:
-            inv_agg = pd.concat([inv_agg, pd.DataFrame([{"item_norm": "stonefeel fino (total)", "Quantity": fino_total_qty}])], ignore_index=True)
             
         merged = pd.merge(sys_recipe, inv_agg, on="item_norm", how="left")
         merged["Quantity"] = merged["Quantity"].fillna(0.0)
@@ -394,12 +401,10 @@ with calc_col1:
 with calc_col2:
     project_sqm = st.number_input("Enter Project Area (m²)", min_value=1.0, value=100.0, step=5.0)
 
-# Generate project requirements
+# Generate project requirements using engine.prepare_inventory
+inv_agg_calc = engine.prepare_inventory(active_inv)
 calc_recipe = rec_df[rec_df["System"] == selected_calc_system].copy()
 calc_recipe["item_norm"] = calc_recipe["Item"].astype(str).apply(engine.normalize)
-inv_agg_calc = active_inv.copy()
-inv_agg_calc["item_norm"] = inv_agg_calc["Item"].astype(str).apply(engine.normalize)
-inv_agg_calc = inv_agg_calc.groupby("item_norm", as_index=False)["Quantity"].sum()
 
 calc_merged = pd.merge(calc_recipe, inv_agg_calc, on="item_norm", how="left")
 calc_merged["Quantity"] = calc_merged["Quantity"].fillna(0.0)
