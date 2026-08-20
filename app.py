@@ -187,9 +187,9 @@ class InventoryCapacityEngine:
 # APP INTERFACE
 # -------------------------------------------------------------
 st.title("🏗️ MODOS Flooring Master Inventory & Project Calculator")
-st.markdown("Real-time bottleneck and capacity analyzer with a dedicated project materials estimator (no prices).")
+st.markdown("Real-time bottleneck and capacity analyzer with live project estimator.")
 
-# Full Master Warehouse Inventory
+# Full Master Warehouse Inventory (34x 20L + 11x 7.5L = 762.5L Base Resin)
 full_warehouse_master_inv = [
     {"Item": "Paviseal 300 (F300)", "Size/Packaging": "1000L IBC + 8x 5L Pails", "Quantity": 1040.0, "Unit": "L", "Category": "Primer / Sealer"},
     {"Item": "Paviseal 700 (F700)", "Size/Packaging": "24x 1kg Bottles + 1kg Hidrofugante", "Quantity": 25.0, "Unit": "kg", "Category": "Topcoat / Sealer"},
@@ -204,7 +204,7 @@ full_warehouse_master_inv = [
     {"Item": "Stonefeel fino (Hueso)", "Size/Packaging": "25kg Bags", "Quantity": 0.0, "Unit": "kg", "Category": "Stonefeel Powder"},
     {"Item": "Stonefeel fino (Jade)", "Size/Packaging": "25kg Bags", "Quantity": 0.0, "Unit": "kg", "Category": "Stonefeel Powder"},
     {"Item": "Stone feel base fina 0.4", "Size/Packaging": "36x 25kg Bags", "Quantity": 900.0, "Unit": "kg", "Category": "Stonefeel Powder"},
-    {"Item": "Stonefeel base resin", "Size/Packaging": "Stonepool 2C Base (680L) + Stone Feel Pool Base (82.5L)", "Quantity": 762.5, "Unit": "L", "Category": "Stonefeel Resin"},
+    {"Item": "Stonefeel base resin", "Size/Packaging": "34x 20L Pails (680L) + 11x 7.5L Pails (82.5L)", "Quantity": 762.5, "Unit": "L", "Category": "Stonefeel Resin"},
     {"Item": "Stonefeel fine resin", "Size/Packaging": "32x 20L Pails (640L) + 7x 7.5L Pails (52.5L)", "Quantity": 692.5, "Unit": "L", "Category": "Stonefeel Resin"},
     {"Item": "Lithium Silicate", "Size/Packaging": "2x 1kg Bottles + 8x 5kg Pails", "Quantity": 42.0, "Unit": "kg", "Category": "Densifier"},
     {"Item": "Ecopox CEM", "Size/Packaging": "12x 5kg Matched Sets (A+B+C)", "Quantity": 60.0, "Unit": "kg", "Category": "Epoxy Cement Primer"},
@@ -243,7 +243,7 @@ full_warehouse_master_inv = [
     {"Item": "Pavimper CB", "Size/Packaging": "12L", "Quantity": 12.0, "Unit": "L", "Category": "Waterproofing"}
 ]
 
-# Recipes with Container Sizes for Project Estimation
+# Recipes with Container Sizes (Stonefeel walls fino includes both Base Fina 0.4 and Regular Fino Powder)
 recipes_data = [
     # 1. Decopox Standard
     {"System": "Decopox Standard", "Item": "פריימר F300", "Rate": 0.02, "Container_Size": 20.0, "Unit": "L"},
@@ -303,6 +303,7 @@ recipes_data = [
     # 7. Stonefeel walls fino
     {"System": "Stonefeel walls fino", "Item": "פריימר F300", "Rate": 0.04, "Container_Size": 20.0, "Unit": "L"},
     {"System": "Stonefeel walls fino", "Item": "Stone feel base fina 0.4", "Rate": 3.00, "Container_Size": 25.0, "Unit": "kg"},
+    {"System": "Stonefeel walls fino", "Item": "Stonefeel fino", "Rate": 3.00, "Container_Size": 25.0, "Unit": "kg"},
     {"System": "Stonefeel walls fino", "Item": "Stonefeel fine resin", "Rate": 1.00, "Container_Size": 20.0, "Unit": "L"},
     {"System": "Stonefeel walls fino", "Item": "Lithium Silicate", "Rate": 0.01, "Container_Size": 1.0, "Unit": "kg"},
     {"System": "Stonefeel walls fino", "Item": "Paviseal 700", "Rate": 0.005, "Container_Size": 1.0, "Unit": "kg"}
