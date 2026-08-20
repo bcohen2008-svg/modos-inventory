@@ -13,10 +13,10 @@ class InventoryCapacityEngine:
         self.aliases = {
             # F300 (Paviseal 300)
             "f300": "f300", "f 300": "f300", "פריימר f300": "f300", "f300 פריימר": "f300",
-            "paviseal 300": "f300", "paviseal300": "f300",
+            "paviseal 300": "f300", "paviseal300": "f300", "paviseal 300 (f300)": "f300",
             
             # F700 / Hidrofugante
-            "f700": "f700", "f 700": "f700", "paviseal 700": "f700",
+            "f700": "f700", "f 700": "f700", "paviseal 700": "f700", "paviseal 700 (f700)": "f700",
             "hidrofugante / f700": "f700", "hidrofugante/f700": "f700",
             "hidrofugante": "f700", "hidrofugante 6772": "f700",
             
@@ -178,30 +178,67 @@ class InventoryCapacityEngine:
 # -------------------------------------------------------------
 # APP INTERFACE
 # -------------------------------------------------------------
-st.title("🏗️ MODOS Flooring Inventory & Capacity Dashboard")
-st.markdown("Real-time bottleneck and yield calculator with editable inventory and color breakdowns.")
+st.title("🏗️ MODOS Flooring Master Warehouse & Capacity Dashboard")
+st.markdown("Real-time bottleneck and yield calculator with full master warehouse stock list.")
 
-default_inv = [
-    {"Item": "Paviseal 300", "Quantity": 1040.0, "Unit": "L"},
-    {"Item": "Paviseal 700", "Quantity": 25.0, "Unit": "kg"},
-    {"Item": "Decopox", "Quantity": 250.0, "Unit": "kg"},
-    {"Item": "Pavex Primer", "Quantity": 45.0, "Unit": "kg"},
-    {"Item": "Veladura", "Quantity": 75.0, "Unit": "kg"},
-    {"Item": "Orfapol 50", "Quantity": 98.4, "Unit": "kg"},
-    {"Item": "Stonefeel base grueso", "Quantity": 1225.0, "Unit": "kg"}, # 49 bags x 25kg
-    {"Item": "Stonefeel grueso", "Quantity": 800.0, "Unit": "kg"},       # 32 bags x 25kg
-    {"Item": "Stonefeel fino (Neutro)", "Quantity": 475.0, "Unit": "kg"}, # 19 bags x 25kg
-    {"Item": "Stonefeel fino (Tiffra)", "Quantity": 50.0, "Unit": "kg"},  # 2 bags x 25kg
-    {"Item": "Stonefeel fino (Hueso)", "Quantity": 0.0, "Unit": "kg"},   # 0 in stock
-    {"Item": "Stonefeel fino (Jade)", "Quantity": 0.0, "Unit": "kg"},    # 0 in stock
-    {"Item": "Stone feel base fina 0.4", "Quantity": 900.0, "Unit": "kg"},# 36 bags x 25kg
-    {"Item": "Stone feel pool base", "Quantity": 135.0, "Unit": "L"},    # Liquid base resin
-    {"Item": "Stone feel fine resin", "Quantity": 252.5, "Unit": "L"},   # Liquid finish resin
-    {"Item": "Lithium Silicate", "Quantity": 42.0, "Unit": "kg"},
-    {"Item": "Ecopox CEM", "Quantity": 60.0, "Unit": "kg"},
-    {"Item": "ECofondo One", "Quantity": 392.0, "Unit": "kg"},
-    {"Item": "Orfapol Plus", "Quantity": 20.0, "Unit": "kg"},
-    {"Item": "Pavimper", "Quantity": 0.0, "Unit": "kg"}
+# Full Warehouse Master Stock from MODOS Inventory
+full_warehouse_master_inv = [
+    # Systems Essential Stock
+    {"Item": "Paviseal 300 (F300)", "Size/Packaging": "1000L IBC + 8x 5L Pails", "Quantity": 1040.0, "Unit": "L", "Category": "Primer / Sealer"},
+    {"Item": "Paviseal 700 (F700)", "Size/Packaging": "24x 1kg Bottles", "Quantity": 25.0, "Unit": "kg", "Category": "Topcoat / Sealer"},
+    {"Item": "Decopox", "Size/Packaging": "25x 10kg Kits (225kg A + 25kg B)", "Quantity": 250.0, "Unit": "kg", "Category": "Decopox Complete"},
+    {"Item": "Pavex Primer", "Size/Packaging": "1x 30kg + 3x 5kg Sets", "Quantity": 45.0, "Unit": "kg", "Category": "Primer"},
+    {"Item": "Veladura", "Size/Packaging": "15x 5kg Pails", "Quantity": 75.0, "Unit": "kg", "Category": "Glaze / Topcoat"},
+    {"Item": "Orfapol 50", "Size/Packaging": "14x 6kg + 7x 1.2kg Sets + Extra", "Quantity": 98.4, "Unit": "kg", "Category": "Polyurethane Topcoat"},
+    {"Item": "Stonefeel base grueso", "Size/Packaging": "49x 25kg Bags", "Quantity": 1225.0, "Unit": "kg", "Category": "Stonefeel Powder"},
+    {"Item": "Stonefeel grueso", "Size/Packaging": "32x 25kg Bags", "Quantity": 800.0, "Unit": "kg", "Category": "Stonefeel Powder"},
+    {"Item": "Stonefeel fino (Neutro)", "Size/Packaging": "19x 25kg Bags", "Quantity": 475.0, "Unit": "kg", "Category": "Stonefeel Powder"},
+    {"Item": "Stonefeel fino (Tiffra)", "Size/Packaging": "2x 25kg Bags", "Quantity": 50.0, "Unit": "kg", "Category": "Stonefeel Powder"},
+    {"Item": "Stonefeel fino (Hueso)", "Size/Packaging": "25kg Bags", "Quantity": 0.0, "Unit": "kg", "Category": "Stonefeel Powder"},
+    {"Item": "Stonefeel fino (Jade)", "Size/Packaging": "25kg Bags", "Quantity": 0.0, "Unit": "kg", "Category": "Stonefeel Powder"},
+    {"Item": "Stone feel base fina 0.4", "Size/Packaging": "36x 25kg Bags", "Quantity": 900.0, "Unit": "kg", "Category": "Stonefeel Powder"},
+    {"Item": "Stone feel pool base", "Size/Packaging": "11x 7.5L Pails + finish sets", "Quantity": 135.0, "Unit": "L", "Category": "Stonefeel Resin"},
+    {"Item": "Stone feel fine resin", "Size/Packaging": "10x 20L + 7x 7.5L Pails", "Quantity": 252.5, "Unit": "L", "Category": "Stonefeel Resin"},
+    {"Item": "Lithium Silicate", "Size/Packaging": "2x 1kg Bottles + 8x 5kg Pails", "Quantity": 42.0, "Unit": "kg", "Category": "Densifier"},
+    {"Item": "Ecopox CEM", "Size/Packaging": "12x 5kg Matched Sets (A+B+C)", "Quantity": 60.0, "Unit": "kg", "Category": "Epoxy Cement Primer"},
+    {"Item": "ECofondo One", "Size/Packaging": "14x 28kg Sets (A+B+C)", "Quantity": 392.0, "Unit": "kg", "Category": "Epoxy Slurry / Base"},
+    {"Item": "Orfapol Plus", "Size/Packaging": "2x 10kg Kits (15.8kg A + 4.2kg B)", "Quantity": 20.0, "Unit": "kg", "Category": "Polyurethane Topcoat"},
+    
+    # Additional Warehouse Master Stock
+    {"Item": "Stonefeel pool grueso Gris bas", "Size/Packaging": "1x 25kg Bag", "Quantity": 25.0, "Unit": "kg", "Category": "Stonefeel Powder (Special)"},
+    {"Item": "Stonepool 2C Base", "Size/Packaging": "24x 20L Pails", "Quantity": 480.0, "Unit": "L", "Category": "Stone Pool Resin"},
+    {"Item": "Stonepool 2C Abacado", "Size/Packaging": "24x 20L Pails", "Quantity": 480.0, "Unit": "L", "Category": "Stone Pool Resin"},
+    {"Item": "Orfapol 100", "Size/Packaging": "4x 5kg Pails", "Quantity": 20.0, "Unit": "kg", "Category": "Polyurethane Topcoat"},
+    {"Item": "Paviseal 505", "Size/Packaging": "1x 5kg", "Quantity": 5.0, "Unit": "kg", "Category": "Sealer"},
+    {"Item": "Paviseal 505 relief enhancer", "Size/Packaging": "1x 5kg", "Quantity": 5.0, "Unit": "kg", "Category": "Additive"},
+    {"Item": "Resipav garden", "Size/Packaging": "1x 5kg", "Quantity": 5.0, "Unit": "kg", "Category": "Resin"},
+    {"Item": "Desencofrante-L2", "Size/Packaging": "5x 3.5kg", "Quantity": 17.5, "Unit": "kg", "Category": "Release Agent"},
+    {"Item": "Epoxyden primer S.L. A", "Size/Packaging": "2x 10kg", "Quantity": 20.0, "Unit": "kg", "Category": "Primer"},
+    {"Item": "Epoxyden primer S.L. B", "Size/Packaging": "2x 5kg", "Quantity": 10.0, "Unit": "kg", "Category": "Primer"},
+    {"Item": "Denbergloss silicon acrylic A", "Size/Packaging": "1x 14.4L", "Quantity": 14.4, "Unit": "L", "Category": "Topcoat"},
+    {"Item": "Denvergloss silicon acrylic B", "Size/Packaging": "1x 3.6L", "Quantity": 3.6, "Unit": "L", "Category": "Topcoat"},
+    {"Item": "Pavidur 1c", "Size/Packaging": "1x 25kg", "Quantity": 25.0, "Unit": "kg", "Category": "Mortar"},
+    {"Item": "Pavidur 1c Accelerator", "Size/Packaging": "1x 0.2kg", "Quantity": 0.2, "Unit": "kg", "Category": "Accelerator"},
+    {"Item": "Pavifort 85-15 A", "Size/Packaging": "1x 4.5kg", "Quantity": 4.5, "Unit": "kg", "Category": "Floor Coat"},
+    {"Item": "Pavifort 85-15 B", "Size/Packaging": "1x 1.666kg", "Quantity": 1.67, "Unit": "kg", "Category": "Floor Coat"},
+    {"Item": "Pavigrout R2 white", "Size/Packaging": "21x 25kg Bags", "Quantity": 525.0, "Unit": "kg", "Category": "Grout / Repair"},
+    {"Item": "Pavigrout fluido", "Size/Packaging": "2x 25kg Bags", "Quantity": 50.0, "Unit": "kg", "Category": "Grout"},
+    {"Item": "Pavigrout Unnamed", "Size/Packaging": "2x 25kg Bags", "Quantity": 50.0, "Unit": "kg", "Category": "Grout"},
+    {"Item": "Cemcol C2TES1", "Size/Packaging": "4x 25kg Bags", "Quantity": 100.0, "Unit": "kg", "Category": "Adhesive"},
+    {"Item": "Microtopping white", "Size/Packaging": "50x 20kg Bags", "Quantity": 1000.0, "Unit": "kg", "Category": "Microcement"},
+    {"Item": "Revex Cal", "Size/Packaging": "27x 25kg Bags", "Quantity": 675.0, "Unit": "kg", "Category": "Lime Plaster"},
+    {"Item": "Modos Epoxy Primer A", "Size/Packaging": "2x 10kg", "Quantity": 20.0, "Unit": "kg", "Category": "Primer"},
+    {"Item": "Modos Epoxy Primer B", "Size/Packaging": "2x 5kg", "Quantity": 10.0, "Unit": "kg", "Category": "Primer"},
+    {"Item": "Redexy 3C Comp A", "Size/Packaging": "2x 4.5kg", "Quantity": 9.0, "Unit": "kg", "Category": "Repair Mortar"},
+    {"Item": "Redexy 3C Comp B", "Size/Packaging": "2x 3kg", "Quantity": 6.0, "Unit": "kg", "Category": "Repair Mortar"},
+    {"Item": "Redexy 3C Comp C", "Size/Packaging": "3x 15kg", "Quantity": 45.0, "Unit": "kg", "Category": "Repair Mortar"},
+    {"Item": "Hidrofugante 6772", "Size/Packaging": "1x 1kg Bottle", "Quantity": 1.0, "Unit": "kg", "Category": "Water Repellent"},
+    {"Item": "Hidroguard Transparent", "Size/Packaging": "10x 1kg Bottles", "Quantity": 10.0, "Unit": "kg", "Category": "Sealer"},
+    {"Item": "Cromasil", "Size/Packaging": "4x 1kg", "Quantity": 4.0, "Unit": "kg", "Category": "Treatment"},
+    {"Item": "Pantera", "Size/Packaging": "5x 25kg Bags", "Quantity": 125.0, "Unit": "kg", "Category": "Aggregates"},
+    {"Item": "Goat all terrain", "Size/Packaging": "1x 25kg Bag", "Quantity": 25.0, "Unit": "kg", "Category": "Aggregates"},
+    {"Item": "Pavimper 2C", "Size/Packaging": "1x 24kg Bag", "Quantity": 24.0, "Unit": "kg", "Category": "Waterproofing"},
+    {"Item": "Pavimper CB", "Size/Packaging": "12L", "Quantity": 12.0, "Unit": "L", "Category": "Waterproofing"}
 ]
 
 recipes_data = [
@@ -271,8 +308,8 @@ recipes_data = [
 rec_df = pd.DataFrame(recipes_data)
 engine = InventoryCapacityEngine()
 
-# Sidebar: File Upload
-st.sidebar.header("📁 Data Source")
+# Sidebar: File Upload / Filters
+st.sidebar.header("📁 Inventory Controls")
 uploaded_file = st.sidebar.file_uploader("Upload Updated Inventory (.xlsx / .csv)", type=["xlsx", "csv"])
 
 if uploaded_file is not None:
@@ -281,11 +318,32 @@ if uploaded_file is not None:
     else:
         inv_df = pd.read_excel(uploaded_file)
 else:
-    inv_df = pd.DataFrame(default_inv)
+    inv_df = pd.DataFrame(full_warehouse_master_inv)
 
-st.subheader("📝 Live Editable Warehouse Inventory")
-st.caption("Double-click any quantity below to edit live. Fino colors and system yields recalculate instantly.")
-edited_inv_df = st.data_editor(inv_df, num_rows="dynamic", use_container_width=True)
+# Search / Filter Bar for Warehouse Table
+search_query = st.sidebar.text_input("🔍 Search Material / Category", "")
+category_list = ["All"] + sorted(list(set(inv_df["Category"].dropna().unique())))
+selected_category = st.sidebar.selectbox("📂 Filter by Category", category_list)
+
+filtered_inv = inv_df.copy()
+if selected_category != "All":
+    filtered_inv = filtered_inv[filtered_inv["Category"] == selected_category]
+if search_query.strip() != "":
+    filtered_inv = filtered_inv[
+        filtered_inv["Item"].str.contains(search_query, case=False, na=False) |
+        filtered_inv["Category"].str.contains(search_query, case=False, na=False)
+    ]
+
+st.subheader("📦 Master Warehouse Inventory (Live Editable)")
+st.caption("Double-click any quantity below to edit live. All systems, bottleneck alerts, and leftover stock will recalculate instantly.")
+edited_inv_df = st.data_editor(filtered_inv, num_rows="dynamic", use_container_width=True)
+
+# Merge edits back into master if filtered
+if len(filtered_inv) != len(inv_df):
+    inv_df.update(edited_inv_df)
+    active_inv = inv_df
+else:
+    active_inv = edited_inv_df
 
 # Calculation
 systems = [
@@ -296,7 +354,7 @@ results = {}
 summary_list = []
 
 for s in systems:
-    res = engine.calculate(edited_inv_df, rec_df, s)
+    res = engine.calculate(active_inv, rec_df, s)
     results[s] = res
     summary_list.append({
         "System Name": res["system"],
@@ -337,14 +395,15 @@ for i, s in enumerate(systems):
 excel_buffer = io.BytesIO()
 with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
     pd.DataFrame(summary_list).to_excel(writer, sheet_name="Executive Summary", index=False)
+    active_inv.to_excel(writer, sheet_name="Master Warehouse Stock", index=False)
     for s in systems:
         results[s]["table"].to_excel(writer, sheet_name=s[:31], index=False)
         if results[s]["color_breakdown"] is not None:
             results[s]["color_breakdown"].to_excel(writer, sheet_name=f"{s[:20]}_Colors", index=False)
 
 st.download_button(
-    label="📥 Download Complete Updated Excel Report (With Colors)",
+    label="📥 Download Complete Updated Excel Report (With Master Stock & Colors)",
     data=excel_buffer.getvalue(),
-    file_name="MODOS_All_Systems_With_Colors_Report.xlsx",
+    file_name="MODOS_Master_Inventory_and_Capacity_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
