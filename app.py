@@ -451,7 +451,26 @@ tabs = st.tabs(systems)
 for i, s in enumerate(systems):
     with tabs[i]:
         res = results[s]
+        
+        # Prominent Max Yield and Bottleneck Metric Cards inside each tab
+        tab_col1, tab_col2 = st.columns(2)
+        with tab_col1:
+            st.metric(
+                label=f"🏆 Maximum Achievable Capacity ({s})",
+                value=f"{res['max_meters']:.2f} m²",
+                help="The absolute maximum square meters that can be produced based on the limiting component in stock."
+            )
+        with tab_col2:
+            st.metric(
+                label="⚠️ Limiting Bottleneck Component",
+                value=str(res['bottleneck']),
+                delta="Restricting System Max",
+                delta_color="inverse"
+            )
+        
+        st.markdown(f"**Inventory Breakdown & Leftovers at {res['max_meters']:.2f} m²:**")
         st.dataframe(res["table"], use_container_width=True)
+        
         if res["color_breakdown"] is not None:
             st.markdown("🎨 **Stonefeel Fino Colors Capacity Breakdown:**")
             st.dataframe(res["color_breakdown"], use_container_width=True)
