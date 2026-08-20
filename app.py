@@ -204,7 +204,7 @@ full_warehouse_master_inv = [
     {"Item": "Stonefeel fino (Hueso)", "Size/Packaging": "25kg Bags", "Quantity": 0.0, "Unit": "kg", "Category": "Stonefeel Powder"},
     {"Item": "Stonefeel fino (Jade)", "Size/Packaging": "25kg Bags", "Quantity": 0.0, "Unit": "kg", "Category": "Stonefeel Powder"},
     {"Item": "Stone feel base fina 0.4", "Size/Packaging": "36x 25kg Bags", "Quantity": 900.0, "Unit": "kg", "Category": "Stonefeel Powder"},
-    {"Item": "Stonefeel base resin", "Size/Packaging": "Stonepool 2C Base (480L) + Stone Feel Pool Base (82.5L)", "Quantity": 562.5, "Unit": "L", "Category": "Stonefeel Resin"},
+    {"Item": "Stonefeel base resin", "Size/Packaging": "Stonepool 2C Base (680L) + Stone Feel Pool Base (82.5L)", "Quantity": 762.5, "Unit": "L", "Category": "Stonefeel Resin"},
     {"Item": "Stonefeel fine resin", "Size/Packaging": "32x 20L Pails (640L) + 7x 7.5L Pails (52.5L)", "Quantity": 692.5, "Unit": "L", "Category": "Stonefeel Resin"},
     {"Item": "Lithium Silicate", "Size/Packaging": "2x 1kg Bottles + 8x 5kg Pails", "Quantity": 42.0, "Unit": "kg", "Category": "Densifier"},
     {"Item": "Ecopox CEM", "Size/Packaging": "12x 5kg Matched Sets (A+B+C)", "Quantity": 60.0, "Unit": "kg", "Category": "Epoxy Cement Primer"},
