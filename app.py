@@ -72,20 +72,22 @@ class InventoryCapacityEngine:
             "stone feel base fina": "stone feel base fina 0.4",
             "stonefeel base fina": "stone feel base fina 0.4",
             
-            # Base Resin
+            # Base Resin (34x 20L + 11x 7.5L = 762.5L)
             "stone feel pool base": "stonefeel base resin",
             "stone pool base resin": "stonefeel base resin",
             "stonepool 2c base": "stonefeel base resin",
             "stonefeel base 2c": "stonefeel base resin",
             "stonepool base": "stonefeel base resin",
+            "stonefeel base resin": "stonefeel base resin",
             
-            # Fine / Finish Resin
+            # Fine / Finish Resin (32x 20L + 7x 7.5L = 692.5L)
             "stone feel pool finish": "stonefeel fine resin",
             "stone pool fine resin": "stonefeel fine resin",
             "stonepool finish": "stonefeel fine resin",
             "stonefeel finish 2c": "stonefeel fine resin",
             "stonepool 2c finish": "stonefeel fine resin",
-            "stonepool 2c abacado": "stonefeel fine resin"
+            "stonepool 2c abacado": "stonefeel fine resin",
+            "stonefeel fine resin": "stonefeel fine resin"
         }
         self.unlimited_terms = ["quartz", "pigment", "accelerator", "sand", "קוורץ", "פיגמנט", "אקסלרטור"]
 
@@ -189,7 +191,7 @@ class InventoryCapacityEngine:
 st.title("🏗️ MODOS Flooring Master Inventory & Project Calculator")
 st.markdown("Real-time bottleneck and capacity analyzer with live project estimator.")
 
-# Full Master Warehouse Inventory (34x 20L + 11x 7.5L = 762.5L Base Resin)
+# Master Warehouse Inventory
 full_warehouse_master_inv = [
     {"Item": "Paviseal 300 (F300)", "Size/Packaging": "1000L IBC + 8x 5L Pails", "Quantity": 1040.0, "Unit": "L", "Category": "Primer / Sealer"},
     {"Item": "Paviseal 700 (F700)", "Size/Packaging": "24x 1kg Bottles + 1kg Hidrofugante", "Quantity": 25.0, "Unit": "kg", "Category": "Topcoat / Sealer"},
@@ -211,7 +213,7 @@ full_warehouse_master_inv = [
     {"Item": "ECofondo One", "Size/Packaging": "14x 28kg Sets (A+B+C)", "Quantity": 392.0, "Unit": "kg", "Category": "Epoxy Slurry / Base"},
     {"Item": "Orfapol Plus", "Size/Packaging": "2x 10kg Kits (15.8kg A + 4.2kg B)", "Quantity": 20.0, "Unit": "kg", "Category": "Polyurethane Topcoat"},
     
-    # Other Master Inventory Line Items
+    # Other Inventory Line Items
     {"Item": "Stonefeel pool grueso Gris bas", "Size/Packaging": "1x 25kg Bag (Excluded from standard systems)", "Quantity": 25.0, "Unit": "kg", "Category": "Stonefeel Powder (Special)"},
     {"Item": "Orfapol 100", "Size/Packaging": "4x 5kg Pails", "Quantity": 20.0, "Unit": "kg", "Category": "Polyurethane Topcoat"},
     {"Item": "Paviseal 505", "Size/Packaging": "1x 5kg", "Quantity": 5.0, "Unit": "kg", "Category": "Sealer"},
@@ -243,7 +245,7 @@ full_warehouse_master_inv = [
     {"Item": "Pavimper CB", "Size/Packaging": "12L", "Quantity": 12.0, "Unit": "L", "Category": "Waterproofing"}
 ]
 
-# Recipes with Container Sizes (Stonefeel walls fino includes both Base Fina 0.4 and Regular Fino Powder)
+# Recipes with Container Sizes
 recipes_data = [
     # 1. Decopox Standard
     {"System": "Decopox Standard", "Item": "פריימר F300", "Rate": 0.02, "Container_Size": 20.0, "Unit": "L"},
@@ -300,7 +302,7 @@ recipes_data = [
     {"System": "Stonefeel Fino and grueso", "Item": "Lithium Silicate", "Rate": 0.01, "Container_Size": 1.0, "Unit": "kg"},
     {"System": "Stonefeel Fino and grueso", "Item": "Paviseal 700", "Rate": 0.005, "Container_Size": 1.0, "Unit": "kg"},
     
-    # 7. Stonefeel walls fino
+    # 7. Stonefeel walls fino (Base Fina 0.4 + Regular Fino + Fine Resin)
     {"System": "Stonefeel walls fino", "Item": "פריימר F300", "Rate": 0.04, "Container_Size": 20.0, "Unit": "L"},
     {"System": "Stonefeel walls fino", "Item": "Stone feel base fina 0.4", "Rate": 3.00, "Container_Size": 25.0, "Unit": "kg"},
     {"System": "Stonefeel walls fino", "Item": "Stonefeel fino", "Rate": 3.00, "Container_Size": 25.0, "Unit": "kg"},
